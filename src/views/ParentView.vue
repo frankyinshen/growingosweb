@@ -294,19 +294,30 @@ const deleteTask = async (id: string) => {
 }
 
 const addToDailyPlan = async (task: any, offset: number = 0) => {
-  let targetDate = selectedDate.value
-  if (offset === 1) {
-    const d = new Date(); d.setDate(d.getDate() + 1)
-    targetDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-  }
+  // 💡 修复逻辑：直接基于系统当前时间计算今天和明天，不受日历选中日期干扰
+  const d = new Date()
+  d.setDate(d.getDate() + offset)
+  const targetDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  
   try {
     const res = await authFetch(`${API_URL}/api/daily-tasks`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ task_id: task.id, planned_duration: task.default_duration, family_code: familyCode, date: targetDate })
     })
     const json = await res.json()
-    if (json.success) { if (offset === 1) alert(`已成功将「${task.name}」指派到明天！`); await fetchDailyTasks() }
-  } catch (err) { console.error(err) }
+    if (json.success) { 
+      if (offset === 1) alert(`已成功将「${task.name}」指派到明天！`)
+      // 💡 只有当目标日期正好是日历当前查看的日期时，才需要刷新页面展示新任务
+      if (targetDate === selectedDate.value) {
+        await fetchDailyTasks()
+      }
+    } else {
+      alert('指派失败：' + (json.error || json.message || '未知错误'))
+    }
+  } catch (err: any) { 
+    console.error(err)
+    alert('指派失败，请检查网络') 
+  }
 }
 
 const addSelectedToDailyPlan = async () => {
