@@ -554,7 +554,7 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
                 <div class="bundle-list" v-if="weeklyTemplates.length > 0">
                   <div v-for="tpl in weeklyTemplates" :key="tpl.id" class="bundle-chip-wrapper">
                     <div class="bundle-chip-item" style="border-color: #a5d6a7;">
-                      <span style="font-size: 0.8rem; font-weight: bold; color: #1b5e20; padding: 4px 8px;">{{ tpl.name }} ({{ tpl.weekdays.split(',').map((d:Number)=>'日一二三四五六'[d]).join('') }})</span>
+                      <span style="font-size: 0.8rem; font-weight: bold; color: #1b5e20; padding: 4px 8px;">{{ tpl.name }} ({{ tpl.weekdays.split(',').map((d:string)=>'日一二三四五六'[parseInt(d)]).join('') }})</span>
                       <button class="delete-bundle-btn" @click="deleteWeeklyTemplate(tpl.id)" title="删除此模板">×</button>
                     </div>
                   </div>
